@@ -1,1 +1,4 @@
 # HUSE
+
+# Documentation coming soon
+
