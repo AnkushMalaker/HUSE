@@ -2,7 +2,7 @@ import tensorflow as tf
 import numpy as np
 import tensorflow_hub as hub
 import random
-from keras.preprocessing import image
+from tensorflow.keras.preprocessing import image
 
 
 def avg_of_array(set_of_tokens):  # function to calculate average of all tokens
@@ -25,6 +25,7 @@ def cos_dist(label1, label2):
 
 
 def get_adj_graph(classes):
+    print("Downloading universal sentence encoder")
     # Using pretrained Universal Sentence Encoder
     module_url = "https://tfhub.dev/google/universal-sentence-encoder/4"
     model = hub.load(module_url)

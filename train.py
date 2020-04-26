@@ -12,7 +12,6 @@ import mxnet as mx
 
 
 
-
 def classification_loss(y_pred, y_true):
   # training=training is needed only if there are layers with different
   # behavior during training versus inference (e.g. Dropout).
@@ -72,7 +71,7 @@ def main(argv):
     CSV_FILE_PATH = 'data.csv'
     num_epochs = 250000
     BATCH_SIZE = 1024
-    img_shape = (224, 224) # Reduce based on RAM
+    img_shape = (224, 224, 3) # Reduce based on RAM
     GRAPH_THRESHOLD = 0.5
     LEARNING_RATE = 1.6192e-05
     
@@ -113,13 +112,13 @@ def main(argv):
 
     for x in range(len(class_names)):
         mapping[class_names[x]] = x
-
+    
     # integer representation
     for x in range(df.shape[0]):
         training_class_intmap[x] = mapping[training_class_intmap[x]]
 
     training_classes = tf.keras.utils.to_categorical(training_class_intmap)
-    image_names = df.images
+    image_names = df.image
     text_list = df.text
 
     text_list = utils.clean_text(text_list)
@@ -171,4 +170,4 @@ def main(argv):
             print("Epoch {:03d}: Loss: {:.3f}".format(epoch,epoch_loss_avg.result()))
 
 if __name__ == "__main__":
-   main(sys.argv[1:])
+    main(sys.argv[1:])

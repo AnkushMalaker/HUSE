@@ -8,7 +8,7 @@ from tensorflow.keras.models import Model
 from tensorflow.keras.applications import resnet50, ResNet101
 
 
-def get_resnet50(img_shape=(80,80)):
+def get_resnet50(img_shape=(80,80,3)):
     '''
     Arguments: input image shape
     default = (80,80)
@@ -19,7 +19,7 @@ def get_resnet50(img_shape=(80,80)):
     img_embedding_extractor_model = Model(inputs=image_input, outputs=image_embedding_output_layer) #Create a new model and add GlobalAveragePooling2D layer to it.
     return img_embedding_extractor_model
 
-def get_resnet101(img_shape=(80,80)):
+def get_resnet101(img_shape=(80,80,3)):
     '''
     Arguments: input image shape
     default = (80,80)
