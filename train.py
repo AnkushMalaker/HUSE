@@ -8,7 +8,6 @@ from numpy import argmax
 import sys, getopt
 import pandas as pd
 from bert_embedding import BertEmbedding
-import mxnet as mx
 
 
 
@@ -132,8 +131,7 @@ def main(argv):
     elif (IMAGE_ENCODER=='resnet101'):
         image_embedding_extractor_model = encoder.get_resnet101(img_shape)
     if (TEXT_ENCODER=='bert'):
-        ctx = mx.gpu(0)
-        bert_embedding = BertEmbedding(ctx=ctx)
+        bert_embedding = BertEmbedding()
         text_encoder_size = 768
     
     complete_model = build_model(image_encoder_size , text_encoder_size, num_classes)
