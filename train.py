@@ -81,7 +81,7 @@ def main(argv):
     
 
     try:
-        opts, args = getopt.getopt(argv,"i:t:",["image_encoder=","text_encoder="])
+        opts, args = getopt.getopt(argv,"i:t:b:",["image_encoder=","text_encoder=","batch_size="])
     except getopt.GetoptError:
         print('test -i <image_folder> -c <csv_filename>')
         sys.exit(2)
@@ -94,6 +94,8 @@ def main(argv):
             IMAGE_ENCODER = arg
         elif opt in ("-c", "--text_encoder"):
             TEXT_ENCODER = arg
+        elif opt in ("-b", "--batch_size"):
+            BATCH_SIZE = arg
         
     
     
