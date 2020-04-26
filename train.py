@@ -69,7 +69,7 @@ def main(argv):
     IMAGE_DIRECTORY = '/images'
     CSV_FILE_PATH = 'data.csv'
     num_epochs = 250000
-    BATCH_SIZE = 1024
+    BATCH_SIZE = 1
     img_shape = (224, 224, 3) # Reduce based on RAM
     GRAPH_THRESHOLD = 0.5
     LEARNING_RATE = 1.6192e-05

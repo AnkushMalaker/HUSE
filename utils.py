@@ -103,9 +103,11 @@ def encode_and_pack_batch(batch_size, image_encoder, text_encoder, image_names, 
         image_name1 = image_names[indexes1[i]]
         image_path1 = 'images/' + image_name1
         img1 = image.load_img(image_path1, target_size=img_shape)
+	img1 = image.img_to_array(img1)
         image_name2 = image_names[indexes2[i]]
         image_path2 = 'images/' + image_name2
         img2 = image.load_img(image_path2, target_size=img_shape)
+	img2 = image.img_to_array(img2)
         images1.append(img1)
         images2.append(img2)
         y1_batch.append(training_classes[indexes1[i]])
