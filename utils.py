@@ -47,8 +47,9 @@ def get_adj_graph(classes):
 
     return adj_graph_classes
 
+
 def clean_text(text_list):
-    for i in range(len(text_list)): #cleaning data
+    for i in range(len(text_list)):  # cleaning data
         sentence = text_list[i]
         sentence.strip()
         sentence = sentence.split(' ')
@@ -56,6 +57,7 @@ def clean_text(text_list):
             sentence.remove("")
         text_list[i] = sentence
     return text_list
+
 
 def pack_batch(image_encodings, text_encodings, training_classes, dataset_size, batch_size):
     '''
@@ -103,21 +105,15 @@ def encode_and_pack_batch(batch_size, image_encoder, text_encoder, image_names, 
         image_name1 = image_names[indexes1[i]]
         image_path1 = 'images/' + image_name1
         img1 = image.load_img(image_path1, target_size=img_shape)
-	img1 = image.img_to_array(img1)
+        img1 = image.img_to_array(img1)
         image_name2 = image_names[indexes2[i]]
         image_path2 = 'images/' + image_name2
         img2 = image.load_img(image_path2, target_size=img_shape)
-	img2 = image.img_to_array(img2)
+        img2 = image.img_to_array(img2)
         images1.append(img1)
         images2.append(img2)
         y1_batch.append(training_classes[indexes1[i]])
         y2_batch.append(training_classes[indexes2[i]])
-        
-
-    image_encodings1 = image_encoder(np.array(images1))
-    image_encodings2 = image_encoder(np.array(images2))
-
-    for i in range(batch_size):
         result1 = text_encoder(text_list[indexes1[i]])
         resutl2 = text_encoder(text_list[indexes2[i]])
         avg_array1 = avg_of_array(result1)
@@ -125,5 +121,7 @@ def encode_and_pack_batch(batch_size, image_encoder, text_encoder, image_names, 
         x1_text_batch.append(avg_array1)
         x2_text_batch.append(avg_array2)
 
+    image_encodings1 = image_encoder(np.array(images1))
+    image_encodings2 = image_encoder(np.array(images2))
 
     return image_encodings1, np.array(x1_text_batch), image_encodings2, np.array(x2_text_batch), np.array(y1_batch), np.array(y2_batch)

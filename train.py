@@ -85,7 +85,6 @@ def main(argv):
     except getopt.GetoptError:
         print('test -i <image_folder> -c <csv_filename>')
         sys.exit(2)
-    print(args)
     for opt, arg in opts:
         if opt == '-h':
             print('test.py -i <inputfile> -o <outputfile>')
@@ -95,7 +94,8 @@ def main(argv):
         elif opt in ("-c", "--text_encoder"):
             TEXT_ENCODER = arg
         elif opt in ("-b", "--batch_size"):
-            BATCH_SIZE = arg
+            BATCH_SIZE = int(arg)
+            print("Set batch_size to %d" %BATCH_SIZE)
         
     
     
