@@ -3,7 +3,6 @@
 # Documentation coming soon
 
 ### To-do:  
--  Add better bert model that can run on GPU
 -  Use argparse for arguments, add better arguments
 -  Add example data and images
 -  Support for text that is longer than 512 words using TF-IDF
@@ -15,3 +14,6 @@
   year={2019}
 }   
 https://arxiv.org/abs/1911.05978
+
+### Credits and acknowledgements:
+For helping in understanding how to tokenize inputs for BERT: https://medium.com/@vineet.mundhra/loading-bert-with-tensorflow-hub-7f5a1c722565
