@@ -173,8 +173,6 @@ def encode_and_pack_batch(batch_size, image_encoder, text_encoder, image_names, 
         masks2.append(inputmask2)
         segments2.append(inputsegment2)
 
-    for inp in [np.array(input_ids1), np.array(masks1), np.array(segments1)]:
-        print(inp.shape)
     image_encodings1 = image_encoder(np.array(images1))
     image_encodings2 = image_encoder(np.array(images2))
     text_encodings1, _ = text_encoder(

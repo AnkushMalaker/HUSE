@@ -8,6 +8,7 @@ from numpy import argmax
 import sys
 import getopt
 import pandas as pd
+import time
 # from bert_embedding import BertEmbedding   #Remove if build pass
 
 
@@ -147,8 +148,9 @@ def main(argv):
     # train_accuracy_results = []
     # Define the optimize and specify the learning rate
     optimizer = tf.keras.optimizers.RMSprop(learning_rate=LEARNING_RATE)
-
+    epoch_time = []
     for epoch in range(num_epochs):
+        epoch_start_time = time.time()
         epoch_loss_avg = tf.keras.metrics.Mean()
         # epoch_accuracy = tf.keras.metrics.CategoricalAccuracy() #Uncomment if you want to track
         # Training loop - using batches of 1024
@@ -169,8 +171,11 @@ def main(argv):
 
         # End epoch
         train_loss_results.append(epoch_loss_avg.result())
-
+        epoch_end_time = time.time()
+        epoch_time.append((epoch_end_time-epoch_start_time))
         if epoch % 5 == 0:
+            print("Average Epoch time: %s seconds." %str(np.sum(epoch_time)/5))
+            epoch_time = []
             print("Epoch {:03d}: Loss: {:.3f}".format(
                 epoch, epoch_loss_avg.result()))
 
