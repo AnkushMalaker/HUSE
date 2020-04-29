@@ -6,6 +6,7 @@
 -  Add better bert model that can run on GPU
 -  Use argparse for arguments, add better arguments
 -  Add example data and images
+-  Support for text that is longer than 512 words using TF-IDF
 
 @article{narayana2019huse,
   title={HUSE: Hierarchical Universal Semantic Embeddings},
