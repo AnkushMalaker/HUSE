@@ -6,9 +6,10 @@ import tensorflow as tf
 import numpy as np
 from numpy import argmax
 import sys
-import getopt
 import pandas as pd
 import time
+import configparser
+import argparse
 # from bert_embedding import BertEmbedding   #Remove if build pass
 
 
@@ -73,36 +74,21 @@ def grad(model, x1, x2, y1, y2, loss_weights, graph_threshold, adj_graph):
     return loss_value, tape.gradient(loss_value, model.trainable_variables)
 
 
-def main(argv):
-    CSV_FILE_PATH = 'data.csv'
-    num_epochs = 250000
-    BATCH_SIZE = 1
-    img_shape = (224, 224, 3)  # Reduce based on RAM
-    GRAPH_THRESHOLD = 0.5
-    LEARNING_RATE = 1.6192e-05
-
+def main(args):
+    config = configparser.ConfigParser()
+    config.read('config.ini')
+    CSV_FILE_PATH = config['DEFAULT']['CSV_FILE_PATH']
+    num_epochs = int(args.num_epochs)
+    BATCH_SIZE = int(args.batch_size)
+    CHANNELS = int(config['DEFAULT']['CHANNELS'])  # Reduce based on RAM
+    IMG_SIZE = int(config['DEFAULT']['IMG_SIZE'])
+    img_shape = (IMG_SIZE, IMG_SIZE, CHANNELS)
+    GRAPH_THRESHOLD = float(config['DEFAULT']['GRAPH_THRESHOLD'])
+    LEARNING_RATE = float(config['DEFAULT']['LEARNING_RATE'])
+    IMAGE_ENCODER = config['DEFAULT']['IMAGE_ENCODER']
+    TEXT_ENCODER = config['DEFAULT']['TEXT_ENCODER']
     # Give importance to classification, semantic and gap loss respectively.
     LOSS_WEIGHTS = [0.6, 0.2, 0.2]
-    IMAGE_ENCODER = 'resnet50'
-    TEXT_ENCODER = 'bert'
-
-    try:
-        opts, args = getopt.getopt(
-            argv, "i:t:b:", ["image_encoder=", "text_encoder=", "batch_size="])
-    except getopt.GetoptError:
-        print('test -i <image_folder> -c <csv_filename>')
-        sys.exit(2)
-    for opt, arg in opts:
-        if opt == '-h':
-            print('test.py -i <inputfile> -o <outputfile>')
-            sys.exit()
-        elif opt in ("-i", "--image_encoder"):
-            IMAGE_ENCODER = arg
-        elif opt in ("-c", "--text_encoder"):
-            TEXT_ENCODER = arg
-        elif opt in ("-b", "--batch_size"):
-            BATCH_SIZE = int(arg)
-            print("Set batch_size to %d" % BATCH_SIZE)
 
     df = pd.read_csv(CSV_FILE_PATH)
     num_samples = df.shape[0]
@@ -174,11 +160,21 @@ def main(argv):
         epoch_end_time = time.time()
         epoch_time.append((epoch_end_time-epoch_start_time))
         if epoch % 5 == 0:
-            print("Average Epoch time: %s seconds." %str(np.sum(epoch_time)/5))
+            print("Average Epoch time: %s seconds." %
+                  str(np.sum(epoch_time)/5))
             epoch_time = []
             print("Epoch {:03d}: Loss: {:.3f}".format(
                 epoch, epoch_loss_avg.result()))
+    # serialize model to HDF5
+    complete_model.save_weights("model.h5")
+    print("Saved model to disk")
 
 
 if __name__ == "__main__":
-    main(sys.argv[1:])
+    parser = argparse.ArgumentParser(description='Train and save the model.')
+    parser.add_argument('-b', '--batch_size', type=int,
+                        help='Specify the batch size', default='1024')
+    parser.add_argument('-e', '--num_epochs', type=int,
+                        help='Specify nuber of epochs', default='250000')
+    args = parser.parse_args()
+    main(args)
