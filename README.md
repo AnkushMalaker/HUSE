@@ -17,7 +17,7 @@ HUSE: Hierarchical Universal Semantic Embedding
 - Images: Put the unzipped images in the /images folder
 - Create a data.csv file with 'img_name,text,class' columns. (See the example provided)
 ### Config
-- The config.ini file can be modified to update training_parameters such as learning_rate, dataset_path, etc
+- The config.ini file can be modified to update training parameters such as learning_rate, graph_threshold, dataset_path, etc
 - To specify batch_size and number of epochs, specify them in the command line when calling `train.py` as follow
 ``` python trian.py -b 512 -e 1500```
 ### Environment Setu
@@ -70,4 +70,4 @@ The hundreds of articles and blogs that explained various concepts for free
     eprint={1911.05978},
     archivePrefix={arXiv},
     primaryClass={cs.CV}
-}
+  }
