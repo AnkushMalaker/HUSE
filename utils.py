@@ -114,6 +114,7 @@ def encode_and_pack_batch(batch_size, image_encoder, text_encoder, image_names, 
             segments = []
             masks = []
             y_batch = []
+            print("Encoding batch: %d" %(num_samples//batch_size))
             for j in range(batch_size):
                 index = batch_size*i + j
                 image_name = image_names[index]
