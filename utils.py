@@ -142,10 +142,10 @@ def encode_and_pack_batch(batch_size, image_encoder, text_encoder, image_names, 
                 image_encodings = one_batch_image_encodings
                 text_encodings = one_batch_text_encodings
             else:
-                image_encodings = np.concatenate(
-                    image_encodings, one_batch_image_encodings)
-                text_encodings = np.concatenate(
-                    text_encodings, one_batch_text_encodings)
+                image_encodings = np.concatenate((
+                    image_encodings, one_batch_image_encodings))
+                text_encodings = np.concatenate((
+                    text_encodings, one_batch_text_encodings))
         y_batch = np.array(y_batch)
         np.save('batched_data/img_encodings.npz', image_encodings, allow_pickle=True)
         np.save('batched_data/text_encodings.npz', text_encodings, allow_pickle=True)
