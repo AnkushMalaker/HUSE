@@ -134,22 +134,20 @@ def main(args):
     dataset1, dataset2 = utils.encode_and_pack_batch(BATCH_SIZE,image_embedding_extractor_model, text_embedding_extractor_model, image_names, text_list, training_classes, img_shape, tokenizer, IMAGES_PATH)
     
     train_loss_results = []
+    validation_loss_results = []
     # train_accuracy_results = []
     # Define the optimize and specify the learning rate
     optimizer = tf.keras.optimizers.RMSprop(learning_rate=LEARNING_RATE)
-    epoch_time = []
 
     for epoch in range(num_epochs):
+        epoch_start_time = time.time()
+        epoch_loss_avg = tf.keras.metrics.Mean()
         for batch1, batch2 in zip(dataset1, dataset2):
-            
-            epoch_start_time = time.time()
-            epoch_loss_avg = tf.keras.metrics.Mean()
             # epoch_accuracy = tf.keras.metrics.CategoricalAccuracy() #Uncomment if you want to track
             # Training loop - using batches of 1024
             # encode_and_pack_batch(batch_size, image_encoder, text_encoder, image_names, text_list, training_classes, img_shape):
-            xi1, xt1, xi2, xt2, y1, y2 = utils.encode_and_pack_batch(
-                BATCH_SIZE, image_embedding_extractor_model,  text_embedding_extractor_model, image_names, text_list, training_classes, img_shape,
-                tokenizer)
+            xi1, xt1, y1 = batch1
+            xi2, xt2, y2 = batch2
             x1 = [xi1, xt1]
             x2 = [xi2, xt2]
             # Optimize the model
@@ -158,20 +156,16 @@ def main(args):
             optimizer.apply_gradients(
                 zip(grads, complete_model.trainable_variables))
 
-            # Track progress
-            epoch_loss_avg.update_state(loss_value)  # Add current batch loss
+        # Track progress
+        epoch_loss_avg.update_state(loss_value)  # Add current batch loss
 
-            # End epoch
-            train_loss_results.append(epoch_loss_avg.result())
-            epoch_end_time = time.time()
-            epoch_time.append((epoch_end_time-epoch_start_time))
-            if epoch % 5 == 0:
-                print("Average Epoch time: %s seconds." %
-                    str(np.sum(epoch_time)/5))
-                epoch_time = []
-                print("Epoch {:03d}: Loss: {:.3f}".format(
-                    epoch, epoch_loss_avg.result()))
-        # serialize model to HDF5
+        # End epoch
+        train_loss_results.append(epoch_loss_avg.result())
+        epoch_end_time = time.time()
+        print("Epoch {:03d}: Loss: {:.3f}".format(
+        epoch, epoch_loss_avg.result()))
+        print("Time for epoch: %f" %(epoch_end_time-epoch_start_time))
+    # serialize model to HDF5
     complete_model.save_weights("model.h5")
     print("Saved model to disk")
 

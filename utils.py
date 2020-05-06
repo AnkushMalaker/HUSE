@@ -114,7 +114,7 @@ def encode_and_pack_batch(batch_size, image_encoder, text_encoder, image_names, 
             segments = []
             masks = []
             y_batch = []
-            print("Encoding batch: %d" %(num_samples//batch_size))
+            print("Encoding batch: %d out of %d" %(i, num_samples//batch_size+1))
             for j in range(batch_size):
                 index = batch_size*i + j
                 image_name = image_names[index]
@@ -155,11 +155,8 @@ def encode_and_pack_batch(batch_size, image_encoder, text_encoder, image_names, 
     y_batch = tf.data.Dataset.from_tensor_slices(y_batch)
 
     training_batch1 = tf.data.Dataset.zip((image_encodings, text_encodings, y_batch)).batch(batch_size)
+    training_batch1 = training_batch1.shuffle(num_samples)
     training_batch2 = tf.data.Dataset.zip((image_encodings, text_encodings, y_batch)).batch(batch_size)
-        # load images into images1 and images2, convert features to be fed to BERT and load into text_features1 and text_features2
-
-        # There are two outputs from text_encoder. First, is pooled output and second is sequence output
-        # [batch_size, , 768]
-        # We simply use the entire sequence representation.
+    training_batch2 = training_batch2.shuffle(num_samples)
 
     return training_batch1, training_batch2
