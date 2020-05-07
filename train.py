@@ -79,8 +79,10 @@ def main(args):
     config.read('config.ini')
     CSV_FILE_PATH = config['DEFAULT']['CSV_FILE_PATH']
     num_epochs = int(args.num_epochs)
+    print("Number of epochs set tp %d" %num_epochs)
     IMAGES_PATH = config['DEFAULT']['IMAGES_PATH']
     BATCH_SIZE = int(args.batch_size)
+    print("Batch_size set to %d" %BATCH_SIZE)
     CHANNELS = int(config['DEFAULT']['CHANNELS'])  # Reduce based on RAM
     IMG_SIZE = int(config['DEFAULT']['IMG_SIZE'])
     img_shape = (IMG_SIZE, IMG_SIZE, CHANNELS)

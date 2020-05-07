@@ -123,6 +123,8 @@ def encode_and_pack_batch(batch_size, image_encoder, text_encoder, image_names, 
                   (i, num_samples//batch_size+1))
             for j in range(batch_size):
                 index = batch_size*i + j
+                if index>=num_samples:
+                    break
                 image_name = image_names[index]
                 image_path = img_folder_path + image_name
                 img = image.load_img(image_path, target_size=img_shape)
