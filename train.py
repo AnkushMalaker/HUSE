@@ -94,7 +94,7 @@ def main(args):
     df = pd.read_csv(CSV_FILE_PATH)
 
     class_names = df.classes.unique()
-    
+
     # CONVERT TO CATEGORICAL
     temp = list(df.classes)
     training_class_intmap = temp.copy()
@@ -131,8 +131,9 @@ def main(args):
     complete_model = build_model(
         image_encoder_size, text_encoder_size, num_classes)
 
-    dataset1, dataset2 = utils.encode_and_pack_batch(BATCH_SIZE,image_embedding_extractor_model, text_embedding_extractor_model, image_names, text_list, training_classes, img_shape, tokenizer, IMAGES_PATH)
-    
+    dataset1, dataset2 = utils.encode_and_pack_batch(
+        BATCH_SIZE, image_embedding_extractor_model, text_embedding_extractor_model, image_names, text_list, training_classes, img_shape, tokenizer, IMAGES_PATH)
+
     train_loss_results = []
     validation_loss_results = []
     # train_accuracy_results = []
@@ -158,15 +159,18 @@ def main(args):
 
         # Track progress
         epoch_loss_avg.update_state(loss_value)  # Add current batch loss
-
+        
         # End epoch
         train_loss_results.append(epoch_loss_avg.result())
         epoch_end_time = time.time()
         print("Epoch {:03d}: Loss: {:.3f}".format(
-        epoch, epoch_loss_avg.result()))
-        print("Time for epoch: %f" %(epoch_end_time-epoch_start_time))
+            epoch, epoch_loss_avg.result()))
+        print("Time for epoch: %f" % (epoch_end_time-epoch_start_time))
+        if (np.round((epoch/num_epochs),1)==0.5):
+            print("Saving model")
+            complete_model.save('model_half_trained.md5')
     # serialize model to HDF5
-    complete_model.save_weights("model.h5")
+    complete_model.save("model.h5")
     print("Saved model to disk")
 
 

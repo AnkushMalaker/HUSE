@@ -100,11 +100,16 @@ def encode_and_pack_batch(batch_size, image_encoder, text_encoder, image_names, 
     Encodes images and text and then packs a batch
     Returns x1 image encodings, x1 text encodings, x2 image encodings, x2 text encodings, y1 batch, y2 batch
     '''
-    
-    if (os.path.isfile('batched_data/img_encodings.npz')):
-        image_encodings =np.load('batched_data/img_encodings.npz',  allow_pickle=True)
-        text_encodings =np.load('batched_data/text_encodings.npz',  allow_pickle=True)
-        y_batch = np.load('batched_data/classes.npz',  allow_pickle=True)
+    if (os.path.isdir('batched_data')):
+        pass
+    else:
+        os.mkdir('batched_data')
+    if (os.path.isfile('batched_data/img_encodings.npy')):
+        image_encodings = np.load(
+            'batched_data/img_encodings.npy',  allow_pickle=True)
+        text_encodings = np.load(
+            'batched_data/text_encodings.npy',  allow_pickle=True)
+        y_batch = np.load('batched_data/classes.npy',  allow_pickle=True)
     else:
         num_samples = len(image_names)
         index = 0
@@ -114,7 +119,8 @@ def encode_and_pack_batch(batch_size, image_encoder, text_encoder, image_names, 
             segments = []
             masks = []
             y_batch = []
-            print("Encoding batch: %d out of %d" %(i, num_samples//batch_size+1))
+            print("Encoding batch: %d out of %d" %
+                  (i, num_samples//batch_size+1))
             for j in range(batch_size):
                 index = batch_size*i + j
                 image_name = image_names[index]
@@ -125,8 +131,6 @@ def encode_and_pack_batch(batch_size, image_encoder, text_encoder, image_names, 
 
                 # batch labels
                 y_batch.append(training_classes[index])
-
-                
                 inputid, inputmask, inputsegment = convert_sentence_to_features(
                     text_list[index], tokenizer, 512)
 
@@ -147,14 +151,18 @@ def encode_and_pack_batch(batch_size, image_encoder, text_encoder, image_names, 
                 text_encodings = np.concatenate((
                     text_encodings, one_batch_text_encodings))
         y_batch = np.array(y_batch)
-        np.save('batched_data/img_encodings.npz', image_encodings, allow_pickle=True)
-        np.save('batched_data/text_encodings.npz', text_encodings, allow_pickle=True)
-        np.save('batched_data/classes.npz', np.array(y_batch), allow_pickle=True)
+        np.save('batched_data/img_encodings',
+                image_encodings, allow_pickle=True)
+        np.save('batched_data/text_encodings',
+                text_encodings, allow_pickle=True)
+        np.save('batched_data/classes', np.array(y_batch), allow_pickle=True)
     image_encodings = tf.data.Dataset.from_tensor_slices(image_encodings)
     text_encodings = tf.data.Dataset.from_tensor_slices(text_encodings)
     y_batch = tf.data.Dataset.from_tensor_slices(y_batch)
 
-    training_batch1 = tf.data.Dataset.zip((image_encodings, text_encodings, y_batch)).batch(batch_size).shuffle(num_samples)
-    training_batch2 = tf.data.Dataset.zip((image_encodings, text_encodings, y_batch)).batch(batch_size).shuffle(num_samples)
+    training_batch1 = tf.data.Dataset.zip(
+        (image_encodings, text_encodings, y_batch)).batch(batch_size).shuffle(num_samples)
+    training_batch2 = tf.data.Dataset.zip(
+        (image_encodings, text_encodings, y_batch)).batch(batch_size).shuffle(num_samples)
 
     return training_batch1, training_batch2

@@ -52,9 +52,9 @@ The architecture in looks like this:
 - [x] Add Bert model capable of running on GPU
 - [x] Use argparse for arguments, add better arguments
 - [ ] Add example data and images
-- [ ] Add feature to save model checkpoints
+- [x] Save model weights half-way
 - [ ] Support for text that is longer than 512 words using TF-IDF
-- [ ] Fix batching issue - 1 EPOCH uses only one batch + Encode and store to ram
+- [x] Fix batching issue - 1 EPOCH uses only one batch + Encode and store to ram
 
 ### Credits and acknowledgements:
 For constant support and guidance, [Harsha Bommana](https://www.linkedin.com/in/harshabommana)   
