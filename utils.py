@@ -154,9 +154,7 @@ def encode_and_pack_batch(batch_size, image_encoder, text_encoder, image_names, 
     text_encodings = tf.data.Dataset.from_tensor_slices(text_encodings)
     y_batch = tf.data.Dataset.from_tensor_slices(y_batch)
 
-    training_batch1 = tf.data.Dataset.zip((image_encodings, text_encodings, y_batch)).batch(batch_size)
-    training_batch1 = training_batch1.shuffle(num_samples)
-    training_batch2 = tf.data.Dataset.zip((image_encodings, text_encodings, y_batch)).batch(batch_size)
-    training_batch2 = training_batch2.shuffle(num_samples)
+    training_batch1 = tf.data.Dataset.zip((image_encodings, text_encodings, y_batch)).batch(batch_size).shuffle(num_samples)
+    training_batch2 = tf.data.Dataset.zip((image_encodings, text_encodings, y_batch)).batch(batch_size).shuffle(num_samples)
 
     return training_batch1, training_batch2
