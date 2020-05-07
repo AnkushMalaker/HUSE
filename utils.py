@@ -4,6 +4,7 @@ import tensorflow_hub as hub
 import random
 from tensorflow.keras.preprocessing import image
 import encoder
+import os.path
 
 
 def avg_of_array(set_of_tokens):  # function to calculate average of all tokens
@@ -94,93 +95,66 @@ def convert_sentences_to_features(sentences, tokenizer, max_seq_len=20):
     return all_input_ids, all_input_mask, all_segment_ids
 
 
-def pack_batch(image_encodings, text_encodings, training_classes, dataset_size, batch_size):
-    '''
-    Returns x1 image encodings, x1 text encodings, x2 image encodings, x2 text encodings, y1 batch, y2 batch
-    '''
-    x1_images_batch = []
-    x1_text_batch = []
-    x2_images_batch = []
-    x2_text_batch = []
-    y1_batch = []
-    y2_batch = []
-    for _ in range(batch_size):
-        index1 = random.randint(0, dataset_size-1)
-        index2 = random.randint(0, dataset_size-1)
-
-        x1_images_batch.append(image_encodings[index1])
-        x1_text_batch.append(text_encodings[index1])
-
-        x2_images_batch.append(image_encodings[index2])
-        x2_text_batch.append(text_encodings[index2])
-
-        y1_batch.append(training_classes[index1])
-        y2_batch.append(training_classes[index2])
-
-    return np.array(x1_images_batch), np.array(x1_text_batch), np.array(x2_images_batch), np.array(x2_text_batch), np.array(y1_batch), np.array(y2_batch)
-
-
-def encode_and_pack_batch(batch_size, image_encoder, text_encoder, image_names, text_list, training_classes, img_shape, tokenizer):
+def encode_and_pack_batch(batch_size, image_encoder, text_encoder, image_names, text_list, training_classes, img_shape, tokenizer, img_folder_path):
     '''
     Encodes images and text and then packs a batch
     Returns x1 image encodings, x1 text encodings, x2 image encodings, x2 text encodings, y1 batch, y2 batch
     '''
-    num_samples = len(image_names)
-    images1 = []
-    images2 = []
+    
+    if (os.path.isfile('batched_data/img_encodings.npz')):
+        image_encodings =np.load('batched_data/img_encodings.npz',  allow_pickle=True)
+        text_encodings =np.load('batched_data/text_encodings.npz',  allow_pickle=True)
+        y_batch = np.load('batched_data/classes.npz',  allow_pickle=True)
+    else:
+        num_samples = len(image_names)
+        index = 0
+        for i in range((num_samples//batch_size)+1):
+            images = []
+            input_ids = []
+            segments = []
+            masks = []
+            y_batch = []
+            print("Encoding batch: %d out of %d" %(i, num_samples//batch_size+1))
+            for j in range(batch_size):
+                index = batch_size*i + j
+                image_name = image_names[index]
+                image_path = img_folder_path + image_name
+                img = image.load_img(image_path, target_size=img_shape)
+                img = image.img_to_array(img)
+                images.append(img)
 
-    input_ids1 = []
-    masks1 = []
-    segments1 = []
-    input_ids2 = []
-    masks2 = []
-    segments2 = []
+                # batch labels
+                y_batch.append(training_classes[index])
 
-    y1_batch = []
-    y2_batch = []
+                
+                inputid, inputmask, inputsegment = convert_sentence_to_features(
+                    text_list[index], tokenizer, 512)
 
-    indexes1 = random.sample(range(0, num_samples), batch_size)
-    indexes2 = random.sample(range(0, num_samples), batch_size)
+                input_ids.append(inputid)
+                masks.append(inputmask)
+                segments.append(inputsegment)
 
-    # load images into images1 and images2, convert features to be fed to BERT and load into text_features1 and text_features2
-    for i in range(batch_size):
+            one_batch_image_encodings = image_encoder(np.array(images))
+            one_batch_text_encodings, _ = text_encoder(
+                [np.array(input_ids), np.array(masks), np.array(segments)])
 
-        # Batch images
-        image_name1 = image_names[indexes1[i]]
-        image_path1 = 'images/' + image_name1
-        img1 = image.load_img(image_path1, target_size=img_shape)
-        img1 = image.img_to_array(img1)
-        image_name2 = image_names[indexes2[i]]
-        image_path2 = 'images/' + image_name2
-        img2 = image.load_img(image_path2, target_size=img_shape)
-        img2 = image.img_to_array(img2)
-        images1.append(img1)
-        images2.append(img2)
+            if (i == 0):
+                image_encodings = one_batch_image_encodings
+                text_encodings = one_batch_text_encodings
+            else:
+                image_encodings = np.concatenate((
+                    image_encodings, one_batch_image_encodings))
+                text_encodings = np.concatenate((
+                    text_encodings, one_batch_text_encodings))
+        y_batch = np.array(y_batch)
+        np.save('batched_data/img_encodings.npz', image_encodings, allow_pickle=True)
+        np.save('batched_data/text_encodings.npz', text_encodings, allow_pickle=True)
+        np.save('batched_data/classes.npz', np.array(y_batch), allow_pickle=True)
+    image_encodings = tf.data.Dataset.from_tensor_slices(image_encodings)
+    text_encodings = tf.data.Dataset.from_tensor_slices(text_encodings)
+    y_batch = tf.data.Dataset.from_tensor_slices(y_batch)
 
-        # batch labels
-        y1_batch.append(training_classes[indexes1[i]])
-        y2_batch.append(training_classes[indexes2[i]])
+    training_batch1 = tf.data.Dataset.zip((image_encodings, text_encodings, y_batch)).batch(batch_size).shuffle(num_samples)
+    training_batch2 = tf.data.Dataset.zip((image_encodings, text_encodings, y_batch)).batch(batch_size).shuffle(num_samples)
 
-        # batch text
-        inputid1, inputmask1, inputsegment1 = convert_sentence_to_features(
-            text_list[indexes1[i]], tokenizer, 512)
-        inputid2, inputmask2, inputsegment2 = convert_sentence_to_features(
-            text_list[indexes2[i]], tokenizer, 512)
-        input_ids1.append(inputid1)
-        masks1.append(inputmask1)
-        segments1.append(inputsegment1)
-        input_ids2.append(inputid2)
-        masks2.append(inputmask2)
-        segments2.append(inputsegment2)
-
-    image_encodings1 = image_encoder(np.array(images1))
-    image_encodings2 = image_encoder(np.array(images2))
-    text_encodings1, _ = text_encoder(
-        [np.array(input_ids1), np.array(masks1), np.array(segments1)])
-    text_encodings2, _ = text_encoder(
-        [np.array(input_ids2), np.array(masks2), np.array(segments2)])
-    # There are two outputs from text_encoder. First, is pooled output and second is sequence output
-    # [batch_size, , 768]
-    # We simply use the entire sequence representation.
-
-    return image_encodings1, text_encodings1, image_encodings2, text_encodings2, np.array(y1_batch), np.array(y2_batch)
+    return training_batch1, training_batch2
