@@ -26,9 +26,7 @@ HUSE: Hierarchical Universal Semantic Embedding
 tensorflow               2.2
 sentencepiece            0.1.86 
 ```
-### train.py vs large_ram_train.py 
-- Running train.py will encode a `batch_size` number of entries each epoch and discard the encodings when the epoch is finished. This allows training on extremely huge datasets because the entire dataset is not loaded onto memory at once
-- Running large_ram_train.py will encode the entire dataset and store it on memory. This can speed up the training and reduce redundancy. Use this if memory is not a constraint.  
+
 ## Saved Model
 - The model will be saved post training. 
 - Checkpoints feature will be added soon
